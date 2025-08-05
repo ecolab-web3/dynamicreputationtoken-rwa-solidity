@@ -1,70 +1,71 @@
 # Dynamic Reputation Token as a Real-World Asset (RWA)
 
 ![Language](https://img.shields.io/badge/Language-Solidity-orange)
-![Blockchain](https://img.shields.io/badge/Blockchain-EVM%20Chains-blueviolet)
-![Concept](https://img.shields.io/badge/Concept-Soulbound%20Token-purple)
-![License](https://img.shields.io/badge/License-MIT-green)
+![Blockchain](https://img.shields.io/badge/Blockchain-Avalanche_Fuji-red)
+![Verified Contract](https://img.shields.io/badge/Contract-Verified-green)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-This repository contains a prototype smart contract that tokenizes **user reputation** as a dynamic, non-transferable Real-World Asset (RWA). It's designed to solve the problem of platform-locked reputation in the gig economy, freelancer marketplaces, and other service-based platforms.
+This repository contains a smart contract ecosystem that tokenizes **user reputation** as a dynamic, non-transferable Real-World Asset (RWA). It's designed to solve the problem of platform-locked reputation in the gig economy, freelancer marketplaces, and other service-based platforms.
 
-## The Vision: Portable, User-Owned Reputation
+This project has been successfully deployed and verified on the **Avalanche Fuji Testnet**.
 
-In today's digital economy (Web2), a user's reputation—their star ratings, reviews, and badges—is one of their most valuable assets. However, this asset is owned and controlled by the platform (e.g., Uber, Airbnb, Upwork). If a user leaves the platform, their hard-earned reputation is lost.
+## Live Interaction & Contracts
 
-This project demonstrates a Web3 solution where reputation is transformed into a **Soulbound Token (SBT)** whose balance dynamically reflects the user's real-world service quality. This reputation is **owned by the user**, is **verifiable on-chain**, and is **portable** across any platform that integrates with the system.
+This project consists of two interconnected smart contracts. The primary way to interact with them is directly through the block explorer. Please make sure your wallet (e.g., MetaMask) is connected to the **Avalanche Fuji Testnet**.
 
----
+### Contract Details
 
-## Core Concepts & Architecture
+#### 1. Main Reputation Contract (`DYNAMICREPUTATIONTOKEN_RWA.sol`)
+This is the core contract that calculates dynamic reputation scores and allows users to claim achievement awards.
+*   **Address:** [`0x1c6e9aF609eD270AA0120118fFA5e4f26d2D96E7`](https://testnet.snowtrace.io/address/0x1c6e9aF609eD270AA0120118fFA5e4f26d2D96E7)
+*   **Interact:** **[Read / Write on Snowtrace](https://testnet.snowtrace.io/address/0x1c6e9aF609eD270AA0120118fFA5e4f26d2D96E7#writeContract)**
 
-The `DYNAMICREPUTATIONTOKEN_RWA.sol` contract introduces a novel approach to reputation tokenization.
-
-### 1. Dynamic Balance, Not a Stored Value
-Unlike a standard ERC-20 token where balances are stored in a mapping, this contract **calculates the reputation "balance" in real-time**. The `balanceOf` function computes the user's average rating on the fly.
-*   **Formula:** `balance = (totalRatingPoints * 100) / totalRatingCount`
-*   **Example:** A user with an average rating of 4.96 will have a `balanceOf` of `496`. This balance automatically updates with every new rating, perfectly reflecting their current reputation.
-
-### 2. Soulbound and Non-Transferable
-Reputation should be earned, not bought. This contract enforces this by being **non-transferable**.
-*   The `transfer` and `approve` functions are implemented to always revert, making it impossible to sell or delegate one's reputation. This aligns the token with the principles of Soulbound Tokens (SBTs).
-
-### 3. ERC-20-like Interface
-While not a true ERC-20 token, the contract exposes common functions like `name()`, `symbol()`, and `balanceOf(address)`. This makes it easier for wallets and other DApps to read and display a user's reputation score, even if they can't transfer it.
+#### 2. Achievement NFT Contract (`SERVICESREPUTATIONNFT_RWA.sol`)
+This ERC721 contract mints the monthly achievement "trophies". **Its owner has been set to the Main Reputation Contract**, ensuring only it can award NFTs.
+*   **Address:** [`0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793`](https://testnet.snowtrace.io/address/0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793)
+*   **Interact:** **[Read on Snowtrace](https://testnet.snowtrace.io/address/0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793#readContract)**
 
 ---
 
-## How to Test (Using Remix IDE)
+## Overview
 
-You can easily test the dynamic nature of this reputation system in Remix.
+The core idea is to transform a service provider's reputation into a **Soulbound Token (SBT)** whose balance dynamically reflects their real-world service quality. High performance is further rewarded with unique, collectible **Achievement NFTs**. This reputation is **owned by the user**, is **verifiable on-chain**, and is **portable** across any platform that integrates with the system.
 
-1.  **Deploy:** Open `contracts/DYNAMICREPUTATIONTOKEN_RWA.sol` in Remix, compile it, and deploy it to a testnet.
+### Key Concepts Implemented
 
-2.  **Add a 5-Star Rating:**
-    *   Call the `addRating` function with a test address for `provider` and a `rating` of `5`.
-    *   Call `balanceOf` for that provider's address. The result will be `500`.
-
-3.  **Add a 4-Star Rating:**
-    *   Call `addRating` again for the same `provider` with a `rating` of `4`.
-    *   Call `balanceOf` again. The balance will now dynamically update to `450`, reflecting the new average of 4.5.
-
-4.  **Test the Soulbound Nature:**
-    *   Attempt to call the `transfer` function. The transaction will correctly revert with the error "Reputation tokens are non-transferable".
+*   **Two-Contract Architecture**: A main contract handles the dynamic reputation logic, while a separate ERC721 contract issues achievement awards, creating a clean separation of concerns.
+*   **Dynamic Balance**: The `balanceOf` function calculates a provider's reputation score in real-time based on their average rating, rather than storing it as a static value.
+*   **Monthly Achievement NFTs**: High-performing providers (average score ≥ 4.9) can call the `claimMonthlyAchievement` function to mint a unique, timestamped NFT, gamifying excellence.
+*   **Soulbound & Non-Transferable**: The reputation score itself cannot be transferred, ensuring it is earned, not bought. The achievement NFTs, however, are standard ERC721 tokens and can be showcased or transferred.
 
 ---
 
-## Potential Applications
+## How to Test the Full Ecosystem
 
-This model can be applied to any system where quantifiable reputation is key:
-*   **Freelancer & Gig Economy Platforms:** A developer's or driver's rating could become a portable asset.
-*   **DAOs (Decentralized Autonomous Organizations):** Reputation could be used to determine voting power or grant permissions based on contributions.
-*   **E-commerce:** A seller's reputation could be verified across multiple marketplaces.
-*   **Gaming:** A player's skill rating (MMR/Elo) could be represented as a dynamic, soulbound token.
+You can test the entire workflow directly on Snowtrace.
+
+1.  **Add a Rating:**
+    *   Go to the **Main Reputation Contract's** "Write Contract" tab.
+    *   Connect your wallet.
+    *   Use the `addRating` function to give a test address a high average score (e.g., several 5-star ratings).
+
+2.  **Claim the Achievement:**
+    *   **Switch your MetaMask account** to the test address that received the high ratings.
+    *   Call the `claimMonthlyAchievement` function from this account. The transaction will succeed.
+
+3.  **Verify the NFT:**
+    *   Go to the **Achievement NFT Contract's** page on Snowtrace.
+    *   Use the `ownerOf` function in the "Read Contract" tab with `tokenId` 0. It will return the address of the service provider, proving the award was successfully minted to them.
 
 ## Next Steps
 
-This prototype is a proof-of-concept. For a production-ready system, the next steps would be:
-*   **Implement Strict Access Control:** The `addRating` function is currently public for demonstration. A real-world implementation would require a secure mechanism to ensure only legitimate customers who have completed a service can submit a rating. This could be managed by a central platform contract or through NFT-based "proof-of-service" receipts.
-*   **Oracle Integration:** For off-chain reputation systems, an oracle could be used to securely bring existing reputation data on-chain.
+This prototype is a functional foundation. For a production-ready system, the next steps would be:
+*   **Implement an Upgradable Contract using the Proxy Pattern:** To allow for future feature additions or bug fixes without requiring a full migration.
+*   **Build a Full DApp Ecosystem:** Create dedicated interfaces for each user type (a rating portal for customers, a profile page for providers to view their score and claimed NFTs).
+*   **Implement Strict Access Control:** The `addRating` function is currently public for demonstration. A real-world implementation would require a secure mechanism (e.g., proof-of-service receipts) to ensure only legitimate customers can submit ratings.
+*   **Undergo a Professional Security Audit:** A full audit is essential before any mainnet deployment to ensure the safety and integrity of the system.
+
+---
 
 ## License
 
