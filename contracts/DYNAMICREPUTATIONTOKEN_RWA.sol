@@ -1,87 +1,151 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-/**
- * @title DynamicReputationToken
- * @author E-co.lab Dev Team
- * @notice A contract for a non-transferable (Soulbound) reputation token
- * whose balance is dynamically calculated based on a user's average rating.
- * This contract mimics an ERC-20 interface but is not a standard token.
- */
-contract DynamicReputationToken {
-    
-    // Basic metadata to resemble a token
-    string public name = "Service Provider Reputation";
-    string public symbol = "REP";
-    uint8 public decimals = 0; // We use whole numbers (e.g., 496)
+// Interface for this contract to call the ServicesReputationNFT contract
+interface IServicesReputationNFT {
+    function awardAchievement(address to, string memory vintage) external;
+}
 
-    // Struct to store the raw reputation data for each service provider
+/**
+ * @title DYNAMICREPUTATIONTOKEN_RWA
+ * @author E-co.lab Dev Team
+ * @notice A Soulbound reputation token that dynamically calculates the average score
+ * and allows service providers to claim monthly achievement NFTs.
+ */
+contract DYNAMICREPUTATIONTOKEN_RWA {
+    
+    // Updated metadata
+    string public name = "E-co.lab Services Reputations";
+    string public symbol = "E-REP";
+    uint8 public decimals = 0;
+
+    // Struct for reputation data
     struct ReputationData {
-        uint256 totalRatingPoints; // Sum of all star ratings (e.g., 5 + 4 + 5 + ...)
-        uint256 ratingCount;       // Total number of ratings received
+        uint256 totalRatingPoints;
+        uint256 ratingCount;
     }
 
-    // Mapping from the service provider's address to their reputation data
     mapping(address => ReputationData) public reputation;
+    
+    // --- Monthly Achievement Logic ---
+    
+    // Address of the Services Reputation NFT contract
+    IServicesReputationNFT public achievementContract;
 
-    // --- Administrative Functions (example of how data would be added) ---
+    // Mapping to track who has already claimed an award for a given month/year.
+    // E.g., hasClaimed[provider]["202408"] = true
+    mapping(address => mapping(uint256 => bool)) public hasClaimedMonthlyAward;
+    
+    // The minimum average score to be eligible for an award (4.9 * 100)
+    uint256 public constant MINIMUM_SCORE_FOR_AWARD = 490;
+
+    /**
+     * @param _achievementContractAddress The address of the already-deployed ServicesReputationNFT contract.
+     */
+    constructor(address _achievementContractAddress) {
+        achievementContract = IServicesReputationNFT(_achievementContractAddress);
+    }
+
+    // --- Core Reputation Functions ---
 
     /**
      * @notice Adds a new rating for a service provider.
      * @dev In a real system, this function would have strict access control.
-     * Only a customer who completed and paid for a service could call it.
      * @param provider The address of the service provider being rated.
      * @param rating The rating, from 1 to 5 stars.
      */
     function addRating(address provider, uint8 rating) external {
-        // Simple check to ensure the rating is within the correct scale
         require(rating >= 1 && rating <= 5, "Rating must be between 1 and 5");
-        
         ReputationData storage providerReputation = reputation[provider];
         providerReputation.totalRatingPoints += rating;
         providerReputation.ratingCount += 1;
     }
 
-    // --- Read Functions (the core of the dynamic logic) ---
-
     /**
      * @notice Calculates a provider's average reputation score, multiplied by 100.
-     * @return The average score (e.g., a 4.96 average returns 496).
      */
     function getAverageScore(address provider) public view returns (uint256) {
         ReputationData memory providerReputation = reputation[provider];
-
-        // Avoid division by zero if the provider has no ratings
-        if (providerReputation.ratingCount == 0) {
-            return 0;
-        }
-
-        // Calculate the average. We multiply by 100 BEFORE dividing to maintain 2 decimal places of precision.
-        // E.g., (498 points * 100) / 100 ratings = 498
+        if (providerReputation.ratingCount == 0) return 0;
         return (providerReputation.totalRatingPoints * 100) / providerReputation.ratingCount;
     }
 
     /**
-     * @notice The "magic" function. It mimics the balanceOf function of an ERC-20.
-     * @dev Returns a provider's "reputation token" balance, which is their calculated average score.
+     * @notice Mimics the balanceOf function, returning the dynamic reputation score.
      */
     function balanceOf(address provider) public view returns (uint256) {
         return getAverageScore(provider);
     }
-    
-    // --- Transfer Functions (Blocked to behave like an SBT) ---
+
+    // --- New Award Claim Function ---
 
     /**
-     * @notice Transfer is disabled. Reputation cannot be transferred.
+     * @notice Allows a service provider to claim their monthly achievement NFT
+     * if their current average reputation score is 4.9 or higher.
      */
+    function claimMonthlyAchievement() external {
+        address provider = msg.sender;
+        
+        // Check if the current score is high enough
+        uint256 currentScore = getAverageScore(provider);
+        require(currentScore >= MINIMUM_SCORE_FOR_AWARD, "Your reputation score is too low");
+
+        // Generate a unique key for the current year and month (e.g., 202408)
+        (uint256 year, uint256 month, ) = _timestampToDate(block.timestamp);
+        uint256 vintageKey = year * 100 + month;
+
+        // Check if the award for this month has already been claimed
+        require(!hasClaimedMonthlyAward[provider][vintageKey], "This month's award has already been claimed");
+        
+        // Mark the award as claimed for this month
+        hasClaimedMonthlyAward[provider][vintageKey] = true;
+
+        // Create the "vintage" string for the NFT (e.g., "2024-08")
+        string memory vintageString = _uintToVintageString(year, month);
+
+        // Call the NFT contract to mint the award
+        achievementContract.awardAchievement(provider, vintageString);
+    }
+
+    // --- Transfer Functions (Blocked for SBT behavior) ---
+
     function transfer(address, uint256) external pure returns (bool) {
         revert("Reputation tokens are non-transferable");
     }
 
-    /**
-     * @notice Approval is disabled. Reputation cannot be delegated.
-     */
     function approve(address, uint256) external pure returns (bool) {
         revert("Reputation tokens cannot be approved for transfer");
+    }
+
+    // --- Internal Helper Functions ---
+
+    function _timestampToDate(uint256 timestamp) internal pure returns (uint256 year, uint256 month, uint256 day) {
+        // Simple date conversion, not perfectly accurate but sufficient for monthly tracking.
+        (year, month, day) = (timestamp / 31536000 + 1970, (timestamp % 31536000) / 2628000 + 1, (timestamp % 2628000) / 86400 + 1);
+    }
+    
+    function _uintToVintageString(uint256 year, uint256 month) internal pure returns (string memory) {
+        // Pads month with a leading zero if needed (e.g., 8 -> "08")
+        bytes memory monthBytes = month < 10 
+            ? abi.encodePacked(bytes1(uint8(48)), bytes1(uint8(48 + month))) 
+            : abi.encodePacked(bytes1(uint8(48 + (month / 10))), bytes1(uint8(48 + (month % 10))));
+        return string(abi.encodePacked(_uintToString(year),"-",string(monthBytes)));
+    }
+    
+    function _uintToString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) return "0";
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
     }
 }
