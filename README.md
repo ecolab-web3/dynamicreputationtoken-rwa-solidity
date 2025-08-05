@@ -7,11 +7,21 @@
 
 This repository contains a smart contract ecosystem that tokenizes **user reputation** as a dynamic, non-transferable Real-World Asset (RWA). It's designed to solve the problem of platform-locked reputation in the gig economy, freelancer marketplaces, and other service-based platforms.
 
-This project has been successfully deployed and verified on the **Avalanche Fuji Testnet**.
+This project has been successfully deployed and verified on the **Avalanche Fuji Testnet** and includes several DApp prototypes to demonstrate the full workflow.
 
-## Live Interaction & Contracts
+## Live Interaction & DApps
 
-This project consists of two interconnected smart contracts. The primary way to interact with them is directly through the block explorer. Please make sure your wallet (e.g., MetaMask) is connected to the **Avalanche Fuji Testnet**.
+Please make sure your wallet (e.g., MetaMask) is connected to the **Avalanche Fuji Testnet** to interact with the project components.
+
+### DApp Prototypes
+
+*   **Rating Portal (for Customers):** This interface allows a customer to submit a rating for a service provider, which directly impacts their on-chain reputation.
+    *   **[➡️ Access the Rating Portal (english version)](https://ecolab-web3.github.io/dynamicreputationtoken-rwa-solidity/rating_portal-en.html)**
+    *   **[➡️ Acesse o Portal de Avaliação (versão em português)](https://ecolab-web3.github.io/dynamicreputationtoken-rwa-solidity/rating_portal-pt_br.html)**
+
+*   **Provider Dashboard:** This dashboard allows service providers to view their dynamic reputation score and claim their monthly achievement NFTs.
+    *   **[➡️ Access the Provider Dashboard (english version)](https://ecolab-web3.github.io/dynamicreputationtoken-rwa-solidity/provider_dashboard-en.html)**
+    *   **[➡️ Acesse o Painel do Prestador (versão em português)](https://ecolab-web3.github.io/dynamicreputationtoken-rwa-solidity/provider_dashboard-pt_br.html)**
 
 ### Contract Details
 
@@ -33,37 +43,34 @@ The core idea is to transform a service provider's reputation into a **Soulbound
 
 ### Key Concepts Implemented
 
-*   **Two-Contract Architecture**: A main contract handles the dynamic reputation logic, while a separate ERC721 contract issues achievement awards, creating a clean separation of concerns.
-*   **Dynamic Balance**: The `balanceOf` function calculates a provider's reputation score in real-time based on their average rating, rather than storing it as a static value.
-*   **Monthly Achievement NFTs**: High-performing providers (average score ≥ 4.9) can call the `claimMonthlyAchievement` function to mint a unique, timestamped NFT, gamifying excellence.
-*   **Soulbound & Non-Transferable**: The reputation score itself cannot be transferred, ensuring it is earned, not bought. The achievement NFTs, however, are standard ERC721 tokens and can be showcased or transferred.
+*   **Two-Contract Architecture**: A main contract handles the dynamic reputation logic, while a separate ERC721 contract issues achievement awards.
+*   **Dynamic Balance**: The `balanceOf` function calculates a provider's reputation score in real-time based on their average rating.
+*   **Monthly Achievement NFTs**: High-performing providers (average score ≥ 4.9) can call the `claimMonthlyAchievement` function to mint a unique, timestamped NFT.
+*   **Soulbound & Non-Transferable**: The reputation score itself cannot be transferred, ensuring it is earned, not bought.
 
 ---
 
-## How to Test the Full Ecosystem
-
-You can test the entire workflow directly on Snowtrace.
-
-1.  **Add a Rating:**
-    *   Go to the **Main Reputation Contract's** "Write Contract" tab.
-    *   Connect your wallet.
-    *   Use the `addRating` function to give a test address a high average score (e.g., several 5-star ratings).
-
-2.  **Claim the Achievement:**
-    *   **Switch your MetaMask account** to the test address that received the high ratings.
-    *   Call the `claimMonthlyAchievement` function from this account. The transaction will succeed.
-
-3.  **Verify the NFT:**
-    *   Go to the **Achievement NFT Contract's** page on Snowtrace.
-    *   Use the `ownerOf` function in the "Read Contract" tab with `tokenId` 0. It will return the address of the service provider, proving the award was successfully minted to them.
-
 ## Next Steps
 
-This prototype is a functional foundation. For a production-ready system, the next steps would be:
-*   **Implement an Upgradable Contract using the Proxy Pattern:** To allow for future feature additions or bug fixes without requiring a full migration.
-*   **Build a Full DApp Ecosystem:** Create dedicated interfaces for each user type (a rating portal for customers, a profile page for providers to view their score and claimed NFTs).
-*   **Implement Strict Access Control:** The `addRating` function is currently public for demonstration. A real-world implementation would require a secure mechanism (e.g., proof-of-service receipts) to ensure only legitimate customers can submit ratings.
-*   **Undergo a Professional Security Audit:** A full audit is essential before any mainnet deployment to ensure the safety and integrity of the system.
+This prototype is a functional foundation. For a production-ready system, the next steps focus on usability, data integrity, and security.
+
+### 1. Implement an Upgradable Contract using the Proxy Pattern
+
+To allow for future feature additions or bug fixes without requiring a full migration, the next logical step is to implement an upgradable contract using OpenZeppelin's Upgrades Contracts.
+
+### 2. Enhance the DApp Ecosystem
+
+The current DApps are functional prototypes. A production version would require enhancing them with a modern framework and adding features:
+*   **Enhance Rating Portal:** Improve user feedback with modals and notifications.
+*   **Enhance Provider Dashboard:** Add features like a gallery to showcase the achievement NFTs and a detailed history of ratings received.
+
+### 3. Implement Strict Access Control for Ratings
+
+The `addRating` function is currently public for demonstration. A real-world implementation would require a secure mechanism (e.g., using signed messages, or NFT-based "proof-of-service" receipts) to ensure only legitimate customers can submit ratings, preventing spam and manipulation.
+
+### 4. Undergo a Professional Security Audit
+
+Before any mainnet deployment, a full audit by a reputable third-party security firm is essential to ensure the safety and integrity of the system.
 
 ---
 
