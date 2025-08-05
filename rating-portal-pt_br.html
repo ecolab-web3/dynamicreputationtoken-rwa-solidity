@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Avaliação de Serviços</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 2em auto; padding: 1em; border: 1px solid #ccc; border-radius: 8px; }
+        button { font-size: 1em; padding: 0.5em 1em; cursor: pointer; border-radius: 4px; border: 1px solid #007bff; background-color: #007bff; color: white; margin-top: 10px; }
+        button:disabled { background-color: #ccc; border-color: #ccc; cursor: not-allowed; }
+        input, select { font-size: 1em; padding: 0.5em; width: 95%; margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        #status { margin-top: 1em; padding: 0.5em; background-color: #f0f0f0; border-radius: 4px; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>Portal de Avaliação de Serviços</h1>
+    <p>Use esta página para submeter uma avaliação para um prestador de serviço.</p>
+    
+    <button id="connectButton">Conectar Carteira para Avaliar</button>
+    <hr>
+    
+    <div id="ratingForm" style="display:none;">
+        <form id="submitRatingForm">
+            <div>
+                <label for="providerAddress">Endereço da Carteira do Prestador:</label>
+                <input type="text" id="providerAddress" required placeholder="0x...">
+            </div>
+            <div>
+                <label for="serviceRating">Sua Avaliação (1 a 5 estrelas):</label>
+                <select id="serviceRating" required>
+                    <option value="5">⭐⭐⭐⭐⭐ (Excelente)</option>
+                    <option value="4">⭐⭐⭐⭐ (Muito Bom)</option>
+                    <option value="3">⭐⭐⭐ (Bom)</option>
+                    <option value="2">⭐⭐ (Razoável)</option>
+                    <option value="1">⭐ (Ruim)</option>
+                </select>
+            </div>
+            <button type="submit" id="submitButton">Enviar Avaliação</button>
+        </form>
+    </div>
+
+    <div id="status">Por favor, conecte sua carteira para começar.</div>
+
+    <script>
+        const connectButton = document.getElementById('connectButton');
+        const statusDiv = document.getElementById('status');
+        const ratingForm = document.getElementById('ratingForm');
+        const submitRatingForm = document.getElementById('submitRatingForm');
+        const providerAddressInput = document.getElementById('providerAddress');
+        const serviceRatingInput = document.getElementById('serviceRating');
+        const submitButton = document.getElementById('submitButton');
+        
+        const contractAddress = "0x1c6e9aF609eD270AA0120118fFA5e4f26d2D96E7"; // Endereço do DYNAMICREPUTATIONTOKEN_RWA
+        
+        const contractABI = ["function addRating(address provider, uint8 rating)"];
+
+        let provider, signer, contract;
+
+        connectButton.addEventListener('click', async () => {
+            if (typeof window.ethereum === 'undefined') {
+                statusDiv.textContent = "MetaMask não encontrada!"; return;
+            }
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                contract = new ethers.Contract(contractAddress, contractABI, signer);
+                const userAddress = await signer.getAddress();
+                
+                connectButton.style.display = 'none';
+                statusDiv.textContent = `Conectado: ${userAddress.substring(0, 6)}...`;
+                ratingForm.style.display = 'block';
+            } catch (error) {
+                statusDiv.textContent = `Erro ao conectar: ${error.message}`;
+            }
+        });
+
+        submitRatingForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const providerAddress = providerAddressInput.value;
+            const rating = serviceRatingInput.value;
+
+            if (!ethers.utils.isAddress(providerAddress)) {
+                statusDiv.textContent = "Endereço do prestador é inválido.";
+                return;
+            }
+
+            try {
+                submitButton.disabled = true;
+                statusDiv.textContent = "Enviando transação... Por favor, confirme na sua carteira.";
+                const tx = await contract.addRating(providerAddress, rating);
+                statusDiv.textContent = `Transação enviada! Aguardando mineração... Hash: ${tx.hash}`;
+                await tx.wait();
+                statusDiv.textContent = "Sucesso! Avaliação registrada na blockchain.";
+                submitButton.disabled = false;
+                submitRatingForm.reset();
+            } catch (error) {
+                console.error(error);
+                statusDiv.textContent = `Erro ao enviar avaliação: ${error.reason || error.message}`;
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
