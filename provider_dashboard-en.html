@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Provider Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 2em auto; padding: 1em; border: 1px solid #ccc; border-radius: 8px; }
+        button { font-size: 1em; padding: 0.5em 1em; cursor: pointer; border-radius: 4px; border: 1px solid #007bff; background-color: #007bff; color: white; margin-top: 10px; }
+        button:disabled { background-color: #ccc; border-color: #ccc; cursor: not-allowed; }
+        #status, .info-box { margin-top: 1em; padding: 0.5em; background-color: #f0f0f0; border-radius: 4px; word-break: break-all; }
+        .score { font-size: 2.5em; font-weight: bold; color: #007bff; }
+        .section { margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <h1>Service Provider Dashboard</h1>
+    <p>Connect your wallet to view your reputation and claim your achievements.</p>
+    
+    <button id="connectButton">Connect My Wallet</button>
+    <hr>
+    
+    <div id="dashboard" style="display:none;">
+        <div class="info-box">
+            <strong>Connected Wallet:</strong> <span id="userAddress"></span>
+        </div>
+        
+        <div class="section">
+            <h2>Your Current Reputation</h2>
+            <p>Your reputation "balance" is your average rating multiplied by 100.</p>
+            <p class="score"><span id="scoreDisplay">--</span> E-REP</p>
+        </div>
+
+        <div class="section">
+            <h2>Monthly Achievement (Average Score ≥ 4.9)</h2>
+            <p>If your reputation score is above 490, you can claim an exclusive NFT for this month as proof of your excellence!</p>
+            <button id="claimButton">Claim This Month's Achievement</button>
+        </div>
+
+        <div class="section">
+            <h2>Your Achievements (NFTs)</h2>
+            <ul id="nftList">
+                <li>Loading...</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="status">Please connect your wallet to get started.</div>
+
+    <script>
+        const connectButton = document.getElementById('connectButton');
+        const statusDiv = document.getElementById('status');
+        const dashboard = document.getElementById('dashboard');
+        const userAddressSpan = document.getElementById('userAddress');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const claimButton = document.getElementById('claimButton');
+        const nftList = document.getElementById('nftList');
+        
+        const reputationContractAddress = "0x1c6e9aF609eD270AA0120118fFA5e4f26d2D96E7";
+        const nftContractAddress = "0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793";
+        
+        const reputationABI = ["function balanceOf(address provider) view returns (uint256)", "function claimMonthlyAchievement()"];
+        const nftABI = ["function balanceOf(address owner) view returns (uint256)", "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)", "function tokenVintage(uint256 tokenId) view returns (string)"];
+
+        let provider, signer, reputationContract, nftContract;
+
+        connectButton.addEventListener('click', async () => {
+            if (typeof window.ethereum === 'undefined') {
+                statusDiv.textContent = "MetaMask not found!"; return;
+            }
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                reputationContract = new ethers.Contract(reputationContractAddress, reputationABI, signer);
+                nftContract = new ethers.Contract(nftContractAddress, nftABI, signer);
+                const userAddress = await signer.getAddress();
+                
+                connectButton.style.display = 'none';
+                statusDiv.style.display = 'none';
+                userAddressSpan.textContent = userAddress;
+                dashboard.style.display = 'block';
+
+                await updateDashboard(userAddress);
+
+            } catch (error) {
+                statusDiv.textContent = `Error connecting: ${error.message}`;
+            }
+        });
+
+        async function updateDashboard(userAddress) {
+            // Update Reputation Score
+            const score = await reputationContract.balanceOf(userAddress);
+            scoreDisplay.textContent = score.toString();
+
+            // Update Achievement NFT List
+            nftList.innerHTML = ''; // Clear list
+            const nftBalance = await nftContract.balanceOf(userAddress);
+            if (nftBalance.toNumber() === 0) {
+                nftList.innerHTML = '<li>You do not own any achievements yet.</li>';
+            } else {
+                for (let i = 0; i < nftBalance.toNumber(); i++) {
+                    const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
+                    const vintage = await nftContract.tokenVintage(tokenId);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Award of Excellence - Vintage: ${vintage} (Token ID: ${tokenId.toString()})`;
+                    nftList.appendChild(listItem);
+                }
+            }
+        }
+
+        claimButton.addEventListener('click', async () => {
+            try {
+                claimButton.disabled = true;
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = "Sending transaction... Please confirm in your wallet.";
+                const tx = await reputationContract.claimMonthlyAchievement();
+                statusDiv.textContent = `Transaction sent! Awaiting mining... Hash: ${tx.hash}`;
+                await tx.wait();
+                statusDiv.textContent = "Success! Achievement claimed! Your achievements list will now be updated.";
+                await updateDashboard(await signer.getAddress());
+                claimButton.disabled = false;
+            } catch (error) {
+                console.error(error);
+                statusDiv.textContent = `Error claiming achievement: ${error.reason || error.message}`;
+                claimButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
