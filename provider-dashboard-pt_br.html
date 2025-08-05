@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Prestador de Serviço</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 2em auto; padding: 1em; border: 1px solid #ccc; border-radius: 8px; }
+        button { font-size: 1em; padding: 0.5em 1em; cursor: pointer; border-radius: 4px; border: 1px solid #007bff; background-color: #007bff; color: white; margin-top: 10px; }
+        button:disabled { background-color: #ccc; border-color: #ccc; cursor: not-allowed; }
+        #status, .info-box { margin-top: 1em; padding: 0.5em; background-color: #f0f0f0; border-radius: 4px; word-break: break-all; }
+        .score { font-size: 2.5em; font-weight: bold; color: #007bff; }
+        .section { margin-top: 1.5em; padding-top: 1em; border-top: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <h1>Painel do Prestador de Serviço</h1>
+    <p>Conecte sua carteira para ver sua reputação e resgatar suas conquistas.</p>
+    
+    <button id="connectButton">Conectar Minha Carteira</button>
+    <hr>
+    
+    <div id="dashboard" style="display:none;">
+        <div class="info-box">
+            <strong>Carteira Conectada:</strong> <span id="userAddress"></span>
+        </div>
+        
+        <div class="section">
+            <h2>Sua Reputação Atual</h2>
+            <p>Seu "saldo" de reputação é sua média de avaliações multiplicada por 100.</p>
+            <p class="score"><span id="scoreDisplay">--</span> E-REP</p>
+        </div>
+
+        <div class="section">
+            <h2>Conquista Mensal (Média ≥ 4.9)</h2>
+            <p>Se sua reputação está acima de 490, você pode resgatar um NFT exclusivo deste mês como prova de sua excelência!</p>
+            <button id="claimButton">Resgatar Conquista do Mês</button>
+        </div>
+
+        <div class="section">
+            <h2>Suas Conquistas (NFTs)</h2>
+            <ul id="nftList">
+                <li>Carregando...</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="status">Por favor, conecte sua carteira para começar.</div>
+
+    <script>
+        const connectButton = document.getElementById('connectButton');
+        const statusDiv = document.getElementById('status');
+        const dashboard = document.getElementById('dashboard');
+        const userAddressSpan = document.getElementById('userAddress');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const claimButton = document.getElementById('claimButton');
+        const nftList = document.getElementById('nftList');
+        
+        const reputationContractAddress = "0x1c6e9aF609eD270AA0120118fFA5e4f26d2D96E7";
+        const nftContractAddress = "0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793";
+        
+        const reputationABI = ["function balanceOf(address provider) view returns (uint256)", "function claimMonthlyAchievement()"];
+        const nftABI = ["function balanceOf(address owner) view returns (uint256)", "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)", "function tokenVintage(uint256 tokenId) view returns (string)"];
+
+        let provider, signer, reputationContract, nftContract;
+
+        connectButton.addEventListener('click', async () => {
+            if (typeof window.ethereum === 'undefined') {
+                statusDiv.textContent = "MetaMask não encontrada!"; return;
+            }
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                reputationContract = new ethers.Contract(reputationContractAddress, reputationABI, signer);
+                nftContract = new ethers.Contract(nftContractAddress, nftABI, signer);
+                const userAddress = await signer.getAddress();
+                
+                connectButton.style.display = 'none';
+                statusDiv.style.display = 'none';
+                userAddressSpan.textContent = userAddress;
+                dashboard.style.display = 'block';
+
+                await updateDashboard(userAddress);
+
+            } catch (error) {
+                statusDiv.textContent = `Erro ao conectar: ${error.message}`;
+            }
+        });
+
+        async function updateDashboard(userAddress) {
+            // Atualiza a Pontuação de Reputação
+            const score = await reputationContract.balanceOf(userAddress);
+            scoreDisplay.textContent = score.toString();
+
+            // Atualiza a Lista de NFTs de Conquista
+            nftList.innerHTML = ''; // Limpa a lista
+            const nftBalance = await nftContract.balanceOf(userAddress);
+            if (nftBalance.toNumber() === 0) {
+                nftList.innerHTML = '<li>Você ainda não possui nenhuma conquista.</li>';
+            } else {
+                for (let i = 0; i < nftBalance.toNumber(); i++) {
+                    const tokenId = await nftContract.tokenOfOwnerByIndex(userAddress, i);
+                    const vintage = await nftContract.tokenVintage(tokenId);
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Prêmio de Excelência - Safra: ${vintage} (Token ID: ${tokenId.toString()})`;
+                    nftList.appendChild(listItem);
+                }
+            }
+        }
+
+        claimButton.addEventListener('click', async () => {
+            try {
+                claimButton.disabled = true;
+                statusDiv.style.display = 'block';
+                statusDiv.textContent = "Enviando transação... Por favor, confirme na sua carteira.";
+                const tx = await reputationContract.claimMonthlyAchievement();
+                statusDiv.textContent = `Transação enviada! Aguardando mineração... Hash: ${tx.hash}`;
+                await tx.wait();
+                statusDiv.textContent = "Sucesso! Conquista resgatada! A lista de conquistas será atualizada.";
+                await updateDashboard(await signer.getAddress());
+                claimButton.disabled = false;
+            } catch (error) {
+                console.error(error);
+                statusDiv.textContent = `Erro ao resgatar: ${error.reason || error.message}`;
+                claimButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
