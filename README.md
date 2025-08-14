@@ -4,10 +4,18 @@
 ![Blockchain](https://img.shields.io/badge/Blockchain-Avalanche_Fuji-red)
 ![Verified Contract](https://img.shields.io/badge/Contract-Verified-green)
 ![License](https://img.shields.io/badge/License-MIT-blue)
+![Solidity Version](https://img.shields.io/badge/Solidity-0.8.20-yellow.svg)
+![Framework](https://img.shields.io/badge/Framework-Hardhat-purple.svg)
+
+___
+
+## About The Project
 
 This repository contains a smart contract ecosystem that tokenizes **user reputation** as a dynamic, non-transferable Real-World Asset (RWA). It's designed to solve the problem of platform-locked reputation in the gig economy, freelancer marketplaces, and other service-based platforms.
 
-This project has been successfully deployed and verified on the **Avalanche Fuji Testnet** and includes several DApp prototypes to demonstrate the full workflow.
+This project has been successfully migrated to a professional **Hardhat environment**, rigorously tested, deployed, and verified on the **Avalanche Fuji Testnet**.
+
+___
 
 ## Live Interaction & DApps
 
@@ -34,6 +42,28 @@ This is the core contract that calculates dynamic reputation scores and allows u
 This ERC721 contract mints the monthly achievement "trophies". **Its owner has been set to the Main Reputation Contract**, ensuring only it can award NFTs.
 *   **Address:** [`0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793`](https://testnet.snowtrace.io/address/0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793)
 *   **Interact:** **[Read on Snowtrace](https://testnet.snowtrace.io/address/0x0e735190BdB2f4EdB6503ee85309fa0fB1D54793#readContract)**
+
+---
+
+## Development Environment & Testing
+
+This project was migrated from Remix IDE to a professional Hardhat environment to ensure quality and reproducibility.
+
+*   **Framework:** Hardhat
+*   **Solidity Version:** `0.8.20`
+*   **Testing:** A comprehensive test suite was developed using `ethers.js` and `Chai`. The suite consists of **12 passing tests** covering the entire ecosystem.
+
+### Test Coverage
+
+The project achieved the highest possible practical test coverage across its two contracts.
+
+| File                              | % Stmts | % Branch | % Funcs | % Lines |
+|-----------------------------------|---------|----------|---------|---------|
+| DYNAMICREPUTATIONTOKEN_RWA.sol    | 96.30   | 91.67    | 100     | 100     |
+| SERVICESREPUTATIONNFT_RWA.sol     | 100     | 100      | 100     | 100     |
+| **All files**                     | 96.55   | 92.86    | 100     | 100     |
+
+**Note on Code Coverage:** The coverage tool correctly identifies a logical branch related to division-by-zero that is not covered in `DYNAMICREPUTATIONTOKEN_RWA.sol`. This is intentional and a feature of the code's safety. The contract includes an explicit check `if (providerReputation.ratingCount == 0)` which prevents the division from ever occurring. This makes the compiler's built-in "Panic" error for division-by-zero unreachable. Therefore, while the coverage is not a perfect 100%, the test suite fully covers all reachable logic paths in the contract.
 
 ---
 

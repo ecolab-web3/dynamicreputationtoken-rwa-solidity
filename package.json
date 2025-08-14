@@ -1,0 +1,20 @@
+{
+  "name": "dynamicreputationtoken-rwa-solidity",
+  "version": "1.0.0",
+  "description": "A smart contract ecosystem that tokenizes user reputation as a dynamic, non-transferable Real-World Asset (RWA).",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "coverage": "hardhat coverage"
+  },
+  "author": "E-co.lab Dev Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "dotenv": "^17.2.1"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0"
+  },
+  "type": "module"
+}
