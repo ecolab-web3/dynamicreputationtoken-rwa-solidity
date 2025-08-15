@@ -17,11 +17,11 @@ This project has been successfully migrated to a professional **Hardhat environm
 
 ___
 
-## Live Interaction & DApps
+## Live Interaction & dApps
 
 Please make sure your wallet (e.g., MetaMask) is connected to the **Avalanche Fuji Testnet** to interact with the project components.
 
-### DApp Prototypes
+### dApp Prototypes
 
 *   **Rating Portal (for Customers):** This interface allows a customer to submit a rating for a service provider, which directly impacts their on-chain reputation.
     *   **[➡️ Access the Rating Portal (english version)](https://ecolab-web3.github.io/dynamicreputationtoken-rwa-solidity/rating_portal-en.html)**
@@ -88,9 +88,9 @@ This prototype is a functional foundation. For a production-ready system, the ne
 
 To allow for future feature additions or bug fixes without requiring a full migration, the next logical step is to implement an upgradable contract using OpenZeppelin's Upgrades Contracts.
 
-### 2. Enhance the DApp Ecosystem
+### 2. Enhance the dApp Ecosystem
 
-The current DApps are functional prototypes. A production version would require enhancing them with a modern framework and adding features:
+The current dApps are functional prototypes. A production version would require enhancing them with a modern framework and adding features:
 *   **Enhance Rating Portal:** Improve user feedback with modals and notifications.
 *   **Enhance Provider Dashboard:** Add features like a gallery to showcase the achievement NFTs and a detailed history of ratings received.
 
