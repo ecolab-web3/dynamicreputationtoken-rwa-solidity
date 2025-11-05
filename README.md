@@ -34,7 +34,7 @@ This repository is a Hardhat-based boilerplate. To get started and generate the 
     *   Fund your test wallet with some Fuji AVAX from a faucet.
     *   Run the first deployment script:
     ```sh
-    npx hardhat run scripts/01-deploy-nft.ts --network fuji
+    npx hardhat run scripts/01-deployNft.ts --network fuji
     ```
     *   **Copy the `ServicesReputationNFT` address** printed in the terminal.
 
@@ -43,7 +43,7 @@ This repository is a Hardhat-based boilerplate. To get started and generate the 
     *   **Paste the NFT contract address** from the previous step into the `nftContractAddress` variable.
     *   Save the file and run the second script:
     ```sh
-    npx hardhat run scripts/02-deploy-reputation.ts --network fuji
+    npx hardhat run scripts/02-deployReputation.ts --network fuji
     ```
     *   **Copy the `DYNAMICREPUTATIONTOKEN_RWA` address** printed in the terminal.
 
@@ -52,7 +52,7 @@ This repository is a Hardhat-based boilerplate. To get started and generate the 
 *   **Paste both contract addresses** into the corresponding variables.
 *   Save the file and run the final script:
     ```sh
-    npx hardhat run scripts/03-configure-permissions.ts --network fuji
+    npx hardhat run scripts/03-configurePermissions.ts --network fuji
     ```
 Your Dynamic Reputation system is now fully deployed and configured on the Fuji Testnet.
 
