@@ -15,7 +15,7 @@ ___
 
 *   **Official Website:** [ecolab-web3.github.io](https://ecolab-web3.github.io/)
 *   **Whitepaper:** [e-co-lab.gitbook.io/whitepaper](https://e-co-lab.gitbook.io/whitepaper)
-*   **Discord Community:** [discord.gg/Q6BNyUDNtm](https://discord.gg/Q6BNyUDNtm)
+*   **Discord Community:** [discord.gg/mrSuw8AfjC](https://discord.gg/mrSuw8AfjC)
 *   **Twitter:** [x.com/ecolab_web3](https://x.com/ecolab_web3)
 
 ___
@@ -112,6 +112,22 @@ The `addRating` function is currently public for demonstration. A real-world imp
 ### 4. Undergo a Professional Security Audit
 
 Before any mainnet deployment, a full audit by a reputable third-party security firm is essential to ensure the safety and integrity of the system.
+
+___
+
+## Ecosystem Recognition
+
+E-co.lab is a recognized participant in the **[Avalanche Retro9000](https://retro9000.avax.network/)** program, a retroactive public goods funding initiative by the Avalanche Foundation. Our project has been approved for the "L1s & Infrastructure Tooling" round and is currently live for community voting by participants in the Avalanche ecosystem.
+
+You can view our official submission and support our mission here: **[E-co.lab on Retro9000](https://retro9000.avax.network/discover-builders/cmebmfjtw02g5103tb8aalzvi)**
+
+___
+
+## Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+Please feel free to fork the repo and create a pull request, or open an issue with the tag "enhancement".
 
 ---
 
