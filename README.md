@@ -15,22 +15,46 @@ If you find our work valuable, please consider giving us a star on GitHub!
 
 This repository is a Hardhat-based boilerplate. To get started and generate the deployment scripts for this two-contract system, follow these steps:
 
-1.  **Clone the repository:**
+1.  **Clone & Install:**
     ```sh
     git clone https://github.com/ecolab-web3/dynamicreputationtoken-rwa-solidity.git
     cd dynamicreputationtoken-rwa-solidity
-    ```
-2.  **Install dependencies:**
-    ```sh
     npm install
     ```
-3.  **Run the setup command:**
-    ```sh
-    npx hardhat setup
-    ```
-This interactive script will ask for your target network and automatically generate three ordered deployment scripts in your `scripts/` folder (`01-deploy-nft.ts`, `02-deploy-reputation.ts`, and `03-configure-permissions.ts`).
+2.  **Configure Your Environment:**
+    *   This project requires an `.env` file with a private key and RPC URL.
+    *   **Rename** the `.env.example` file in the root directory to **`.env`**.
+    *   Open the new `.env` file and **add your test wallet's private key**.
 
-Follow the instructions printed in your terminal to deploy and configure the entire system.
+3.  **Understand the Contract (Recommended):**
+    *   Before deploying, take a moment to **read the rest of this README and browse the `contracts/` folder**.
+    *   Understanding the smart contract's logic, its functions, and its purpose is a critical step for any developer.
+
+4.  **Deploy the NFT Contract:**
+    *   Fund your test wallet with some Fuji AVAX from a faucet.
+    *   Run the first deployment script:
+    ```sh
+    npx hardhat run scripts/01-deploy-nft.ts --network fuji
+    ```
+    *   **Copy the `ServicesReputationNFT` address** printed in the terminal.
+
+5.  **Deploy the Reputation Contract:**    
+    *   Open the file `scripts/02-deployReputation.ts`.
+    *   **Paste the NFT contract address** from the previous step into the `nftContractAddress` variable.
+    *   Save the file and run the second script:
+    ```sh
+    npx hardhat run scripts/02-deploy-reputation.ts --network fuji
+    ```
+    *   **Copy the `DYNAMICREPUTATIONTOKEN_RWA` address** printed in the terminal.
+
+6.  **Configure Permissions:**
+*   Open the file `scripts/03-configurePermissions.ts`.
+*   **Paste both contract addresses** into the corresponding variables.
+*   Save the file and run the final script:
+    ```sh
+    npx hardhat run scripts/03-configure-permissions.ts --network fuji
+    ```
+Your Dynamic Reputation system is now fully deployed and configured on the Fuji Testnet.
 
 ---
 
