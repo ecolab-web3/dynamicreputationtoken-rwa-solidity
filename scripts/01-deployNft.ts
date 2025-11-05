@@ -8,5 +8,8 @@ await nft.waitForDeployment();
 const nftAddress = await nft.getAddress();
 console.log("✅ ServicesReputationNFT deployed to:", nftAddress);
 console.log("\nACTION: Copy this address for the next step.");
+
+console.log("\nTo verify on Fuji, run:");
+console.log(`npx hardhat verify --network fuji ${contractAddress} "${deployer.address}"`);
 }
 main().catch(e => { console.error(e); process.exit(1); });

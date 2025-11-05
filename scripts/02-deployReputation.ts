@@ -15,5 +15,8 @@ async function main() {
   const reputationAddress = await reputation.getAddress();
   console.log("✅ DYNAMICREPUTATIONTOKEN_RWA deployed to:", reputationAddress);
   console.log("\nACTION: Copy both contract addresses for the next step.");
+
+  console.log("\nTo verify on Fuji, run:");
+  console.log(`npx hardhat verify --network fuji ${contractAddress} "${deployer.address}"`);
 }
 main().catch(e => { console.error(e); process.exit(1); });
