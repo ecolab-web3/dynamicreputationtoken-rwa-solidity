@@ -11,6 +11,29 @@ If you find our work valuable, please consider giving us a star on GitHub!
 
 ___
 
+## Quick Start
+
+This repository is a Hardhat-based boilerplate. To get started and generate the deployment scripts for this two-contract system, follow these steps:
+
+1.  **Clone the repository:**
+    ```sh
+    git clone https://github.com/ecolab-web3/dynamicreputationtoken-rwa-solidity.git
+    cd dynamicreputationtoken-rwa-solidity
+    ```
+2.  **Install dependencies:**
+    ```sh
+    npm install
+    ```
+3.  **Run the setup command:**
+    ```sh
+    npx hardhat setup
+    ```
+This interactive script will ask for your target network and automatically generate three ordered deployment scripts in your `scripts/` folder (`01-deploy-nft.ts`, `02-deploy-reputation.ts`, and `03-configure-permissions.ts`).
+
+Follow the instructions printed in your terminal to deploy and configure the entire system.
+
+___
+
 ## Official E-co.lab Links
 
 *   **Official Website:** [ecolab-web3.github.io](https://ecolab-web3.github.io/)
